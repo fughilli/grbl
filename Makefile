@@ -30,7 +30,8 @@
 
 DEVICE     ?= atmega328p
 CLOCK      = 16000000
-PROGRAMMER ?= -c arduino -P /dev/ttyS8 -b 115200
+PROGRAMMER ?= -c arduino -P /dev/ttyS5 -b 115200
+PROGRAMMER_REMOTE ?= -c arduino -P /dev/ttyACM0 -b 115200
 SOURCE    = main.c motion_control.c gcode.c spindle_control.c coolant_control.c serial.c \
              protocol.c stepper.c eeprom.c settings.c planner.c nuts_bolts.c limits.c jog.c\
              print.c probe.c report.c system.c
@@ -42,6 +43,7 @@ FUSES      = -U hfuse:w:0xd2:m -U lfuse:w:0xff:m
 # Tune the lines below only if you know what you are doing:
 
 AVRDUDE = avrdude $(PROGRAMMER) -p $(DEVICE) -B 10 -F
+AVRDUDE_REMOTE = avrdude $(PROGRAMMER_REMOTE) -p $(DEVICE) -F
 
 # Compile flags for avr-gcc v4.8.1. Does not produce -flto warnings.
 # COMPILE = avr-gcc -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) -I. -ffunction-sections
@@ -71,11 +73,17 @@ $(BUILDDIR)/%.o: $(SOURCEDIR)/%.c
 flash:	all
 	$(AVRDUDE) -U flash:w:grbl.hex:i
 
+flash_remote:  all
+	scp grbl.hex pi@routercontroller.lan:~
+	ssh pi@routercontroller.lan -C "$(AVRDUDE_REMOTE) -U flash:w:grbl.hex:i"
+
 fuse:
 	$(AVRDUDE) $(FUSES)
 
 # Xcode uses the Makefile targets "", "clean" and "install"
-install: flash fuse
+install: flash
+
+install_remote: flash_remote
 
 # if you use a bootloader, change the command below appropriately:
 load: all
