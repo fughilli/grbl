@@ -38,9 +38,7 @@ void spindle_init()
     #ifdef USE_SPINDLE_DIR_AS_ENABLE_PIN
       SPINDLE_ENABLE_DDR |= (1<<SPINDLE_ENABLE_BIT); // Configure as output pin.
     #else
-      #ifndef ENABLE_DUAL_AXIS
         SPINDLE_DIRECTION_DDR |= (1<<SPINDLE_DIRECTION_BIT); // Configure as output pin.
-      #endif
     #endif
     pwm_gradient = SPINDLE_PWM_RANGE/(settings.rpm_max-settings.rpm_min);
   #else
@@ -66,12 +64,20 @@ uint8_t spindle_get_state()
       #endif
     #else
       if (SPINDLE_TCCRA_REGISTER & (1<<SPINDLE_COMB_BIT)) { // Check if PWM is enabled.
-        #ifdef ENABLE_DUAL_AXIS
-          return(SPINDLE_STATE_CW);
-        #else
-          if (SPINDLE_DIRECTION_PORT & (1<<SPINDLE_DIRECTION_BIT)) { return(SPINDLE_STATE_CCW); }
-          else { return(SPINDLE_STATE_CW); }
-        #endif
+        if (SPINDLE_DIRECTION_PORT & (1<<SPINDLE_DIRECTION_BIT)) {
+          #ifdef INVERT_SPINDLE_DIRECTION_PIN
+            return(SPINDLE_STATE_CW);
+          #else
+            return(SPINDLE_STATE_CCW);
+          #endif
+        }
+        else {
+          #ifdef INVERT_SPINDLE_DIRECTION_PIN
+            return(SPINDLE_STATE_CCW);
+          #else
+            return(SPINDLE_STATE_CW);
+          #endif
+        }
       }
     #endif
   #else
@@ -83,8 +89,20 @@ uint8_t spindle_get_state()
       #ifdef ENABLE_DUAL_AXIS    
         return(SPINDLE_STATE_CW);
       #else
-        if (SPINDLE_DIRECTION_PORT & (1<<SPINDLE_DIRECTION_BIT)) { return(SPINDLE_STATE_CCW); }
-        else { return(SPINDLE_STATE_CW); }
+        if (SPINDLE_DIRECTION_PORT & (1<<SPINDLE_DIRECTION_BIT)) {
+          #ifdef INVERT_SPINDLE_DIRECTION_PIN
+            return(SPINDLE_STATE_CW);
+          #else
+            return(SPINDLE_STATE_CCW);
+          #endif
+        }
+        else {
+          #ifdef INVERT_SPINDLE_DIRECTION_PIN
+            return(SPINDLE_STATE_CCW);
+          #else
+            return(SPINDLE_STATE_CW);
+          #endif
+        }
       #endif
     }
   #endif
@@ -239,11 +257,15 @@ void spindle_stop()
   
   } else {
     
-    #if !defined(USE_SPINDLE_DIR_AS_ENABLE_PIN) && !defined(ENABLE_DUAL_AXIS)
+    #if !defined(USE_SPINDLE_DIR_AS_ENABLE_PIN)
+      #ifdef INVERT_SPINDLE_DIRECTION_PIN
       if (state == SPINDLE_ENABLE_CW) {
-        SPINDLE_DIRECTION_PORT &= ~(1<<SPINDLE_DIRECTION_BIT);
-      } else {
+      #else
+      if (state == SPINDLE_ENABLE_CCW) {
+      #endif
         SPINDLE_DIRECTION_PORT |= (1<<SPINDLE_DIRECTION_BIT);
+      } else {
+        SPINDLE_DIRECTION_PORT &= ~(1<<SPINDLE_DIRECTION_BIT);
       }
     #endif
   
