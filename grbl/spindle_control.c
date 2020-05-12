@@ -20,6 +20,7 @@
 */
 
 #include "grbl.h"
+#include "nuts_bolts.h"
 
 
 #ifdef VARIABLE_SPINDLE
@@ -29,6 +30,7 @@
 
 void spindle_init()
 {
+  SPINDLE_TCCRA_REGISTER &= ~(1<<SPINDLE_COMB_BIT); // Disable PWM. Output voltage is zero.
   #ifdef VARIABLE_SPINDLE
     // Configure variable spindle PWM and enable pin, if requried. On the Uno, PWM and enable are
     // combined unless configured otherwise.
@@ -47,6 +49,14 @@ void spindle_init()
       SPINDLE_DIRECTION_DDR |= (1<<SPINDLE_DIRECTION_BIT); // Configure as output pin.
     #endif
   #endif
+
+  delay_ms(100);
+  spindle_set_speed(SPINDLE_PWM_MAX_VALUE);
+  SPINDLE_TCCRA_REGISTER |= (1<<SPINDLE_COMB_BIT); // Enable PWM.
+  delay_ms(2000);
+  spindle_set_speed(SPINDLE_PWM_MIN_VALUE);
+  delay_ms(2000);
+  spindle_set_speed(SPINDLE_PWM_OFF_VALUE);
 
   spindle_stop();
 }
@@ -115,22 +125,23 @@ uint8_t spindle_get_state()
 // Called by spindle_init(), spindle_set_speed(), spindle_set_state(), and mc_reset().
 void spindle_stop()
 {
-  #ifdef VARIABLE_SPINDLE
-    SPINDLE_TCCRA_REGISTER &= ~(1<<SPINDLE_COMB_BIT); // Disable PWM. Output voltage is zero.
-    #ifdef USE_SPINDLE_DIR_AS_ENABLE_PIN
-      #ifdef INVERT_SPINDLE_ENABLE_PIN
-        SPINDLE_ENABLE_PORT |= (1<<SPINDLE_ENABLE_BIT);  // Set pin to high
-      #else
-        SPINDLE_ENABLE_PORT &= ~(1<<SPINDLE_ENABLE_BIT); // Set pin to low
-      #endif
-    #endif
-  #else
-    #ifdef INVERT_SPINDLE_ENABLE_PIN
-      SPINDLE_ENABLE_PORT |= (1<<SPINDLE_ENABLE_BIT);  // Set pin to high
-    #else
-      SPINDLE_ENABLE_PORT &= ~(1<<SPINDLE_ENABLE_BIT); // Set pin to low
-    #endif
-  #endif
+    spindle_set_speed(SPINDLE_PWM_OFF_VALUE);
+  //#ifdef VARIABLE_SPINDLE
+  //  SPINDLE_TCCRA_REGISTER &= ~(1<<SPINDLE_COMB_BIT); // Disable PWM. Output voltage is zero.
+  //  #ifdef USE_SPINDLE_DIR_AS_ENABLE_PIN
+  //    #ifdef INVERT_SPINDLE_ENABLE_PIN
+  //      SPINDLE_ENABLE_PORT |= (1<<SPINDLE_ENABLE_BIT);  // Set pin to high
+  //    #else
+  //      SPINDLE_ENABLE_PORT &= ~(1<<SPINDLE_ENABLE_BIT); // Set pin to low
+  //    #endif
+  //  #endif
+  //#else
+  //  #ifdef INVERT_SPINDLE_ENABLE_PIN
+  //    SPINDLE_ENABLE_PORT |= (1<<SPINDLE_ENABLE_BIT);  // Set pin to high
+  //  #else
+  //    SPINDLE_ENABLE_PORT &= ~(1<<SPINDLE_ENABLE_BIT); // Set pin to low
+  //  #endif
+  //#endif
 }
 
 
@@ -140,24 +151,24 @@ void spindle_stop()
   void spindle_set_speed(uint8_t pwm_value)
   {
     SPINDLE_OCR_REGISTER = pwm_value; // Set PWM output level.
-    #ifdef SPINDLE_ENABLE_OFF_WITH_ZERO_SPEED
-      if (pwm_value == SPINDLE_PWM_OFF_VALUE) {
-        spindle_stop();
-      } else {
-        SPINDLE_TCCRA_REGISTER |= (1<<SPINDLE_COMB_BIT); // Ensure PWM output is enabled.
-        #ifdef INVERT_SPINDLE_ENABLE_PIN
-          SPINDLE_ENABLE_PORT &= ~(1<<SPINDLE_ENABLE_BIT);
-        #else
-          SPINDLE_ENABLE_PORT |= (1<<SPINDLE_ENABLE_BIT);
-        #endif
-      }
-    #else
-      if (pwm_value == SPINDLE_PWM_OFF_VALUE) {
-        SPINDLE_TCCRA_REGISTER &= ~(1<<SPINDLE_COMB_BIT); // Disable PWM. Output voltage is zero.
-      } else {
-        SPINDLE_TCCRA_REGISTER |= (1<<SPINDLE_COMB_BIT); // Ensure PWM output is enabled.
-      }
-    #endif
+    //#ifdef SPINDLE_ENABLE_OFF_WITH_ZERO_SPEED
+    //  if (pwm_value == SPINDLE_PWM_OFF_VALUE) {
+    //    spindle_stop();
+    //  } else {
+    //    SPINDLE_TCCRA_REGISTER |= (1<<SPINDLE_COMB_BIT); // Ensure PWM output is enabled.
+    //    #ifdef INVERT_SPINDLE_ENABLE_PIN
+    //      SPINDLE_ENABLE_PORT &= ~(1<<SPINDLE_ENABLE_BIT);
+    //    #else
+    //      SPINDLE_ENABLE_PORT |= (1<<SPINDLE_ENABLE_BIT);
+    //    #endif
+    //  }
+    //#else
+    //  if (pwm_value == SPINDLE_PWM_OFF_VALUE) {
+    //    SPINDLE_TCCRA_REGISTER &= ~(1<<SPINDLE_COMB_BIT); // Disable PWM. Output voltage is zero.
+    //  } else {
+    //    SPINDLE_TCCRA_REGISTER |= (1<<SPINDLE_COMB_BIT); // Ensure PWM output is enabled.
+    //  }
+    //#endif
   }
 
 

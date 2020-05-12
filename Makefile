@@ -30,7 +30,7 @@
 
 DEVICE     ?= atmega328p
 CLOCK      = 16000000
-PROGRAMMER ?= -c arduino -P /dev/ttyS5 -b 115200
+PROGRAMMER ?= -c arduino -P /dev/ttyUSB0 -b 115200
 PROGRAMMER_REMOTE ?= -c arduino -P /dev/ttyACM0 -b 115200
 SOURCE    = main.c motion_control.c gcode.c spindle_control.c coolant_control.c serial.c \
              protocol.c stepper.c eeprom.c settings.c planner.c nuts_bolts.c limits.c jog.c\

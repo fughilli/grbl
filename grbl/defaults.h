@@ -568,6 +568,45 @@
   #define DEFAULT_HOMING_PULLOFF 1.5 // mm
 #endif
 
+#ifdef DEFAULTS_PCB_MINIMILL
+  // Grbl settings for OpenBuilds OX CNC Machine
+  // http://www.openbuilds.com/builds/openbuilds-ox-cnc-machine.341/
+  #define DEFAULT_X_STEPS_PER_MM 800
+  #define DEFAULT_Y_STEPS_PER_MM 800
+  #define DEFAULT_Z_STEPS_PER_MM 800
+  #define DEFAULT_X_MAX_RATE 400.0 // mm/min
+  #define DEFAULT_Y_MAX_RATE 400.0 // mm/min
+  #define DEFAULT_Z_MAX_RATE 400.0 // mm/min
+  #define DEFAULT_X_ACCELERATION (25.0*60*60) // 10*60*60 mm/min^2 = 10 mm/sec^2
+  #define DEFAULT_Y_ACCELERATION (25.0*60*60) // 10*60*60 mm/min^2 = 10 mm/sec^2
+  #define DEFAULT_Z_ACCELERATION (25.0*60*60) // 10*60*60 mm/min^2 = 10 mm/sec^2
+  #define DEFAULT_X_MAX_TRAVEL 120.0 // mm NOTE: Must be a positive value.
+  #define DEFAULT_Y_MAX_TRAVEL 100.0 // mm NOTE: Must be a positive value.
+  #define DEFAULT_Z_MAX_TRAVEL 40.0 // mm NOTE: Must be a positive value.
+  #define DEFAULT_SPINDLE_RPM_MAX 10000.0 // rpm
+  #define DEFAULT_SPINDLE_RPM_MIN 0.0 // rpm
+  #define DEFAULT_STEP_PULSE_MICROSECONDS 10
+  #define DEFAULT_STEPPING_INVERT_MASK 0
+  #define DEFAULT_DIRECTION_INVERT_MASK 0b011
+  #define DEFAULT_STEPPER_IDLE_LOCK_TIME 255 // msec (0-254, 255 keeps steppers enabled)
+  #define DEFAULT_STATUS_REPORT_MASK 1 // MPos enabled
+  #define DEFAULT_JUNCTION_DEVIATION 0.02 // mm
+  #define DEFAULT_ARC_TOLERANCE 0.002 // mm
+  #define DEFAULT_REPORT_INCHES 0 // false
+  #define DEFAULT_INVERT_ST_ENABLE 0 // false
+  #define DEFAULT_INVERT_LIMIT_PINS 0 // false
+  #define DEFAULT_SOFT_LIMIT_ENABLE 1 // false
+  #define DEFAULT_HARD_LIMIT_ENABLE 0  // false
+  #define DEFAULT_INVERT_PROBE_PIN 0 // false
+  #define DEFAULT_LASER_MODE 0 // false
+  #define DEFAULT_HOMING_ENABLE 1  // false
+  #define DEFAULT_HOMING_DIR_MASK 0b011 // move positive dir
+  #define DEFAULT_HOMING_FEED_RATE 25.0 // mm/min
+  #define DEFAULT_HOMING_SEEK_RATE 400.0 // mm/min
+  #define DEFAULT_HOMING_DEBOUNCE_DELAY 250 // msec (0-65k)
+  #define DEFAULT_HOMING_PULLOFF 1.5 // mm
+#endif
+
 #ifdef DEFAULTS_SIMULATOR
   // Settings only for Grbl Simulator (www.github.com/grbl/grbl-sim)
   // Grbl generic default settings. Should work across different machines.
